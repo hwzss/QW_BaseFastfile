@@ -8,11 +8,31 @@ platform :ios do
   before_each do |lane, options|
 
       next unless lane.equal?:test_lane
+
       unless options[:version]
-        UI.message "检测到您未输入App的版本号"
+        UI.message " ************************************************
+               *  ❌ release需要输入version版本号
+               *  比如: fastlane release version:1.0.0   
+               ************************************************"
         num = "获取当前项目版本号"
         UI.message "当前版本号为:#{}"
         options[:version] = UI.input("请输入这次的版本号:")
+      end
+
+      unless options[:scheme_name]
+        UI.message " ************************************************
+               *  ❌ release需要输入version版本号
+               *  比如: fastlane release version:1.0.0   
+               ************************************************"
+        options[:scheme_name] = UI.input("请输入这次的版本号:")
+      end
+
+      unless options[:ipa_out_put_dir]
+        UI.message " ************************************************
+               *  ❌ release需要输入version版本号
+               *  比如: fastlane release version:1.0.0   
+               ************************************************"
+        options[:ipa_out_put_dir] = UI.input("请输入这次的版本号:")
       end
   end
 
@@ -21,6 +41,34 @@ platform :ios do
 
     UI.message "version 值为#{op[:version]}"
   end
+
+  desc "Upload an relase ipa to TestFilght"
+  lane :release do |op|
+   
+       cocoapods if op[:pod_install]
+
+       version_number = op[:version]
+
+       increment_version_number(version_number: version_number)
+       
+       out_put_dir = op[:ipa_out_put_dir]
+       sub_dir_name = "release" 
+       out_ipa_name = "release_#{version_number}"
+
+       scheme_name = op[:scheme_name]
+
+        gym(
+          scheme: scheme_name,
+          output_directory: "#{out_put_dir}/#{sub_dir_name}",
+          silent: true,
+          clean: false,
+          configuration: "Release",
+          output_name: out_ipa_name,
+        ) 
+        pilot(
+          ipa:"#{out_put_dir}/#{sub_dir_name}/#{out_ipa_name}.ipa"
+        )
+    end
 
 end
 
