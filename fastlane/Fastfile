@@ -1,0 +1,29 @@
+fastlane_version "2.62.0"
+
+default_platform :ios
+
+platform :ios do
+
+
+  before_each do |lane, options|
+
+      unless options[:version]
+        UI.message "检测到您未输入App的版本号"
+        num = "获取当前项目版本号"
+        UI.message "当前版本号为:#{}"
+        options[:version] = UI.input("请输入这次的版本号:")
+      end
+  end
+
+  desc "test"
+  lane :test_lane do |op|
+
+    UI.message "version 值为#{op[:version]}"
+  end
+
+
+  error do |lane, exception|
+
+  end
+end
+
