@@ -21,9 +21,5 @@ platform :ios do
     UI.message "version 值为#{op[:version]}"
   end
 
-
-  error do |lane, exception|
-
-  end
 end
 
