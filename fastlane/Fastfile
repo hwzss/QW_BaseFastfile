@@ -7,6 +7,7 @@ platform :ios do
 
   before_each do |lane, options|
 
+      next unless lane.equal?:test_lane
       unless options[:version]
         UI.message "检测到您未输入App的版本号"
         num = "获取当前项目版本号"
