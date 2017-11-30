@@ -30,21 +30,11 @@ xcode-select --install
 
 # Available Actions
 ## iOS
-### ios test_lane
+### ios qw_release
 ```
-fastlane ios test_lane
+fastlane ios qw_release
 ```
-test
-### ios debugBeta
-```
-fastlane ios debugBeta
-```
-upload a debug  ipa  to testFilght
-### ios release
-```
-fastlane ios release
-```
-upload a relase ipa to testFilght
+Upload an relase ipa to TestFilght
 
 ----
 

@@ -5,57 +5,19 @@ default_platform :ios
 platform :ios do
 
 
-  before_each do |lane, options|
-
-      next unless lane.equal?:test_lane
-
-      unless options[:version]
-        UI.message " ************************************************
-               *  ❌ release需要输入version版本号
-               *  比如: fastlane release version:1.0.0   
-               ************************************************"
-        num = "获取当前项目版本号"
-        UI.message "当前版本号为:#{}"
-        options[:version] = UI.input("请输入这次的版本号:")
-      end
-
-      unless options[:scheme_name]
-        UI.message " ************************************************
-               *  ❌ release需要输入version版本号
-               *  比如: fastlane release version:1.0.0   
-               ************************************************"
-        options[:scheme_name] = UI.input("请输入这次的版本号:")
-      end
-
-      unless options[:ipa_out_put_dir]
-        UI.message " ************************************************
-               *  ❌ release需要输入version版本号
-               *  比如: fastlane release version:1.0.0   
-               ************************************************"
-        options[:ipa_out_put_dir] = UI.input("请输入这次的版本号:")
-      end
-  end
-
-  desc "test"
-  lane :test_lane do |op|
-
-    UI.message "version 值为#{op[:version]}"
-  end
-
   desc "Upload an relase ipa to TestFilght"
-  lane :release do |op|
+  lane :qw_release do |op|
    
        cocoapods if op[:pod_install]
-
-       version_number = op[:version]
+ 
+       version_number = verify_version_lane version:op[:version]
+       out_put_dir = verify_ipa_out_put_dir_lane  ipa_out_put_dir:op[:ipa_out_put_dir]
+       scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
 
        increment_version_number(version_number: version_number)
        
-       out_put_dir = op[:ipa_out_put_dir]
        sub_dir_name = "release" 
        out_ipa_name = "release_#{version_number}"
-
-       scheme_name = op[:scheme_name]
 
         gym(
           scheme: scheme_name,
@@ -69,6 +31,44 @@ platform :ios do
           ipa:"#{out_put_dir}/#{sub_dir_name}/#{out_ipa_name}.ipa"
         )
     end
+
+
+  desc "检测version参数,不存在时就提示"
+  lane :verify_version_lane do |options|
+    
+      unless options[:version]
+        UI.message " ************************************************
+               *  ⏰ 您未输入ipd的版本，将自动根据项目version进行自增
+               *  您可以通过传入version来指定生成特定的版本号
+               *  比如: fastlane release version:1.0.0   
+               ************************************************"
+      end
+      options[:version]
+  end
+  desc "检测scheme，不存在时提示可设置"
+  lane :verify_shceme_lane do |options|
+      unless options[:scheme_name]
+          UI.message " ************************************************
+         *  ⏰ 您未指定特定的scheme,系统XcoudeBulid 将列出所有scheme让你选择
+         *  您可以通过传入scheme_name来指定shceme
+         *  比如: fastlane release scheme_name:\"cloudIM\" 
+         ************************************************"
+      end
+      options[:scheme_name]
+  end
+  desc "检测ipa打包路径，未设置时，要求输入路径"
+  lane :verify_ipa_out_put_dir_lane do |options|
+       unless options[:ipa_out_put_dir]
+        UI.message " ************************************************
+               *  ❌ 未设定ipa打包路径,必须设定一个当前的ipa打包路径，否则ipa将打出在当前项目路径
+               *  您可以通过传入ipa_out_put_dir来指定路径
+               *  比如: fastlane release ipa_out_put_dir:\"./desketop/打包\"   
+               ************************************************"
+        options[:ipa_out_put_dir] = UI.input("请输入打包路径:")
+      end
+      options[:ipa_out_put_dir]
+  end
+
 
 end
 
