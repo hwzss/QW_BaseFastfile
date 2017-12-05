@@ -22,7 +22,7 @@ platform :ios do
       end 
 
 
-      increment_version_number(version_number: version_number)
+      version_number = increment_version_number(version_number: version_number)
 
       sub_dir_name = "release" 
       full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
@@ -58,7 +58,7 @@ platform :ios do
           next
       end 
 
-      increment_version_number(version_number: version_number)
+      version_number = increment_version_number(version_number: version_number)
        
       sub_dir_name = "debugBeta" 
       out_ipa_name = "debugBeta_#{version_number}"
