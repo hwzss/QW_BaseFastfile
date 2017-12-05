@@ -16,21 +16,31 @@ platform :ios do
       out_put_dir = verify_ipa_out_put_dir_lane  ipa_out_put_dir:op[:ipa_out_put_dir]
       scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
 
+      unless Dir.exist?(File.expand_path("#{out_put_dir}"))
+          UI.error("#{out_put_dir} 路径不存在，请填写正确的打包路径")   
+          next
+      end 
+
+
       increment_version_number(version_number: version_number)
-       
+
       sub_dir_name = "release" 
+      full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
+
+      Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
+
       out_ipa_name = "release_#{version_number}"
 
       gym(
         scheme: scheme_name,
-        output_directory: "#{out_put_dir}/#{sub_dir_name}",
+        output_directory: full_output_dir,
         silent: true,
         clean: false,
         configuration: "Release",
         output_name: out_ipa_name,
       ) 
       pilot(
-        ipa:"#{out_put_dir}/#{sub_dir_name}/#{out_ipa_name}.ipa"
+        ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
       ) 
   end
 
@@ -43,21 +53,30 @@ platform :ios do
       out_put_dir = verify_ipa_out_put_dir_lane  ipa_out_put_dir:op[:ipa_out_put_dir]
       scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
 
+      unless Dir.exist?(File.expand_path("#{out_put_dir}"))
+          UI.error("#{out_put_dir} 路径不存在，请填写正确的打包路径")   
+          next
+      end 
+
       increment_version_number(version_number: version_number)
        
       sub_dir_name = "debugBeta" 
       out_ipa_name = "debugBeta_#{version_number}"
 
+      full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
+
+      Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
+
       gym(
         scheme: scheme_name,
-        output_directory: "#{out_put_dir}/#{sub_dir_name}",
+        output_directory: full_output_dir,
         silent: true,
         clean: false,
         configuration: "Debug",
         output_name: out_ipa_name,
       ) 
       pilot(
-        ipa:"#{out_put_dir}/#{sub_dir_name}/#{out_ipa_name}.ipa"
+         ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
       )
   end
 
