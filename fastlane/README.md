@@ -34,7 +34,27 @@ xcode-select --install
 ```
 fastlane ios qw_release
 ```
-Upload an relase ipa to TestFilght
+Upload an release ipa to TestFilght
+### ios qw_debug
+```
+fastlane ios qw_debug
+```
+Upload an debug ipa to TestFilght
+### ios verify_version_lane
+```
+fastlane ios verify_version_lane
+```
+检测version参数,不存在时就提示
+### ios verify_shceme_lane
+```
+fastlane ios verify_shceme_lane
+```
+检测scheme，不存在时提示可设置
+### ios verify_ipa_out_put_dir_lane
+```
+fastlane ios verify_ipa_out_put_dir_lane
+```
+检测ipa打包路径，未设置时，要求输入路径
 
 ----
 
