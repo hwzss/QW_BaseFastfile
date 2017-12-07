@@ -22,7 +22,7 @@ platform :ios do
 
   desc "Upload an debug ipa to TestFilght"
   lane :qw_debug do |op|
-    
+
       upload_ipa_to_testfltght(
         release: true,
         pod_install: op[:pod_install],
@@ -154,6 +154,10 @@ def formatABC
 
 end
 
+
+# self.split('.').join('').to_i + 1
+#丑大了！！！,其实👇下面的方法和这一句代码效果一样，self.split('.').join('').to_i + 1 坑啊，写了那么多
+
 # 将满足正则/^\d{1,}.\d.\d$/ 的值进行自增1
 def increment
 
@@ -179,5 +183,6 @@ def increment
   version_arrs[0..2].join('.')
 
 end
+
 
 end
