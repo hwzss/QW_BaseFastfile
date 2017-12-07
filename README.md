@@ -39,5 +39,10 @@ qw_release(version:op[:version],scheme_name:scheme_name,pod_install:op[:pod_inst
 1. 其他的lane使用方法大致一致，如qw_debug使用方法和qw_release一样。
 2. ”import_from_git“命令作用可查看[介绍文档](https://docs.fastlane.tools/actions/import_from_git/#import_from_git)
 
+提交版本:
+1.2017_12_7提交:
+    1. 增加检验version_number功能，保证version_number的格式为A.B.C的格式
+    2. 增加version_number自增功能，当B,C的值超过9后进行进位行为，如果1.9.9 + 1 = 2.0.0
+
 
 
