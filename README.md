@@ -9,7 +9,7 @@
 ```
 import_from_git(
   url: "https://github.com/hwzss/QW_BaseFastfile.git", # The URL of the repository to import the Fastfile from.
-  branch: "master", # The branch to checkout on the repository. Defaults to `HEAD`.
+  branch: "qwkj", # The branch to checkout on the repository. Defaults to `HEAD`.
   path: "fastlane/Fastfile" # The path of the Fastfile in the repository. Defaults to `fastlane/Fastfile`.
 )
 ```
