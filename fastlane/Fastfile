@@ -83,6 +83,7 @@ platform :ios do
         clean: false,
         configuration: gym_configuration,
         output_name: out_ipa_name,
+        export_xcargs: "-allowProvisioningUpdates",
       ) 
       pilot(
         ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
