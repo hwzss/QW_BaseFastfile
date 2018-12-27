@@ -15,7 +15,8 @@ platform :ios do
         pod_install: op[:pod_install],
         version: op[:version],
         ipa_out_put_dir: op[:ipa_out_put_dir],
-        scheme_name: op[:scheme_name]
+        scheme_name: op[:scheme_name],
+        auto_increment_version: op[:auto_increment_version]
       )
    
   end
@@ -28,27 +29,28 @@ platform :ios do
         pod_install: op[:pod_install],
         version: op[:version],
         ipa_out_put_dir: op[:ipa_out_put_dir],
-        scheme_name: op[:scheme_name]
+        scheme_name: op[:scheme_name],
+        auto_increment_version: op[:auto_increment_version],
+        build_num: op[:build_num]
       )
      
   end
 
   lane :upload_ipa_to_testfltght do |op|
       
-
-      # puts "#{op[:release]}"
-      # puts "#{op[:pod_install]}"
-      # puts "#{op[:version]}"
-      # puts "#{op[:scheme_name]}"
-      # puts "#{op[:ipa_out_put_dir]}"
-      # puts "@@@@@@@@@@@@@@@@@@@@@@@"
+      puts "#{op[:build_num]}"
+      puts "#{op[:auto_increment_version]}"
+      puts "#{op[:release]}"
+      puts "#{op[:pod_install]}"
+      puts "#{op[:version]}"
+      puts "#{op[:scheme_name]}"
+      puts "#{op[:ipa_out_put_dir]}"
+      puts "@@@@@@@@@@@@@@@@@@@@@@@"
       is_release = op[:release]
 
       cocoapods if op[:pod_install]
  
-      version_number = verify_version_lane version:op[:version]
-      out_put_dir = verify_ipa_out_put_dir_lane  ipa_out_put_dir:op[:ipa_out_put_dir]
-      scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
+      version_number = verify_version_lane version:op[:version]                  
 
       unless Dir.exist?(File.expand_path("#{out_put_dir}"))
           UI.error("#{out_put_dir} 路径不存在，请填写正确的打包路径")   
@@ -58,23 +60,39 @@ platform :ios do
       version_number = get_version_number  unless version_number
     
       String.include(VersionFactory)
+      #补齐A.B.C格式
       version_number = version_number.formatABC
-      version_number = version_number.increment
-
+      version_number = version_number.increment if op[:auto_increment_version]
       puts "version_number:#{version_number}"
-
       version_number = increment_version_number(version_number: version_number)
 
+      build_number = op[:build_num]
+      unless op[:auto_increment_version] && op[:version] && build_number
+        # if version number not be givend and can not auto increment then auto increment build number
+        # build number not be givend       
+        build_number = get_build_number 
+        String.include(BuildNumberFactory)        
+        build_number = build_number.formatABC
+        build_number = build_number.incrementBuild        
+      end
+
+      build_number.is_build_avalable
+      puts "build_number:#{build_number}"
+      increment_build_number(build_number: build_number)
+      
+            
+      #out ipa file path
+      out_put_dir = verify_ipa_out_put_dir_lane  ipa_out_put_dir:op[:ipa_out_put_dir]
       sub_dir_name = is_release ? "release" : "debugBeta"
       full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
 
       Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
 
-      out_ipa_name = is_release ? "release_#{version_number}" : "debugBeta_#{version_number}"
-
+      out_ipa_name = is_release ? "release_#{version_number}_build_#{build_number}" : "debugBeta_#{version_number}_build_#{build_number}"
 
       gym_configuration = is_release ? "Release" : "Debug"
 
+      scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
       # puts "scheme_name:#{scheme_name}"
       gym(
         scheme: scheme_name,
@@ -129,6 +147,34 @@ platform :ios do
 
 end
 
+
+module BuildNumberFactory
+  
+  def is_build_avalable
+      unless self =~ /^\d{1,}$/
+          puts "build_number格式不对，正确格式应该为整数"
+      end
+  end
+  
+  def formatBuildNumber
+      build_arrs = self.split('.').map(&:to_i);
+      build_number = build_arrs.last;
+      build_number = 0 unless build_number;
+  end
+
+  def incrementBuild
+      build_arrs = self.split('.').map(&:to_i);
+      build_number = build_arrs.last;
+      if build_number
+        build_number++
+      else
+        build_number = 0
+      end
+
+      build_number
+  end
+  
+end
 
 # 指定给String实例
 module VersionFactory
