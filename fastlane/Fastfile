@@ -16,7 +16,8 @@ platform :ios do
         version: op[:version],
         ipa_out_put_dir: op[:ipa_out_put_dir],
         scheme_name: op[:scheme_name],
-        auto_increment_version: op[:auto_increment_version]
+        auto_increment_version: op[:auto_increment_version],
+        build_num: op[:build_num]
       )
    
   end
@@ -166,7 +167,7 @@ module BuildNumberFactory
       build_arrs = self.split('.').map(&:to_i);
       build_number = build_arrs.last;
       if build_number
-        build_number++
+        build_number = build_number + 1
       else
         build_number = 0
       end
