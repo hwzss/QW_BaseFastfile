@@ -22,7 +22,7 @@
     # )
 
 
-fastlane_version "2.62.0"
+# fastlane_version "2.62.0"
 
 default_platform :ios
 
@@ -87,30 +87,30 @@ platform :ios do
       end
                       
       #out ipa file path      
-      sub_dir_name = is_release ? "release" : "debugBeta"
-      full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
+      # sub_dir_name = is_release ? "release" : "debugBeta"
+      # full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
 
-      Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
+      # Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
 
-      version_number = get_version_number unless version_number
-      out_ipa_name = is_release ? "release_#{version_number}_build_#{build_number}" : "debugBeta_#{version_number}_build_#{build_number}"
+      # version_number = get_version_number unless version_number
+      # out_ipa_name = is_release ? "release_#{version_number}_build_#{build_number}" : "debugBeta_#{version_number}_build_#{build_number}"
 
-      gym_configuration = is_release ? "Release" : "Debug"
+      # gym_configuration = is_release ? "Release" : "Debug"
 
-      scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
-      # puts "scheme_name:#{scheme_name}"
-      gym(
-        scheme: scheme_name,
-        output_directory: full_output_dir,
-        silent: true,
-        clean: false,
-        configuration: gym_configuration,
-        output_name: out_ipa_name,
-        # export_xcargs: "-allowProvisioningUpdates",
-      ) 
-      pilot(
-        ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
-      ) 
+      # scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
+      # # puts "scheme_name:#{scheme_name}"
+      # gym(
+      #   scheme: scheme_name,
+      #   output_directory: full_output_dir,
+      #   silent: true,
+      #   clean: false,
+      #   configuration: gym_configuration,
+      #   output_name: out_ipa_name,
+      #   # export_xcargs: "-allowProvisioningUpdates",
+      # ) 
+      # pilot(
+      #   ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
+      # ) 
   end 
 
   desc "检测version参数,不存在时就提示"
