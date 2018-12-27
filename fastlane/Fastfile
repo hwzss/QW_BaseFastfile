@@ -1,3 +1,27 @@
+
+    # all options is there:
+    # >>>>>>>>>>>>>>
+    #   release
+    #   pod_install
+    #   version
+    #   ipa_out_put_dir
+    #   scheme_name
+    #   auto_increment_version
+    #   build_num
+    # >>>>>>>>>>>>>>
+
+    # there is a simple code for use to upload ipa file to testfltght
+    # upload_ipa_to_testfltght(
+    #   release: true,
+    #   pod_install: op[:pod_install],
+    #   version: op[:version],
+    #   ipa_out_put_dir: op[:ipa_out_put_dir],
+    #   scheme_name: op[:scheme_name],
+    #   auto_increment_version: op[:auto_increment_version],
+    #   build_num: op[:build_num]
+    # )
+
+
 fastlane_version "2.62.0"
 
 default_platform :ios
@@ -7,36 +31,7 @@ platform :ios do
   ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '60'
   ENV['FASTLANE_XCODEBUILD_SETTINGS_RETRIES'] = '10'
 
-  desc "Upload an release ipa to TestFilght"
-  lane :qw_release do |op|
-
-      upload_ipa_to_testfltght(
-        release: true,
-        pod_install: op[:pod_install],
-        version: op[:version],
-        ipa_out_put_dir: op[:ipa_out_put_dir],
-        scheme_name: op[:scheme_name],
-        auto_increment_version: op[:auto_increment_version],
-        build_num: op[:build_num]
-      )
-   
-  end
-
-  desc "Upload an debug ipa to TestFilght"
-  lane :qw_debug do |op|
-
-      upload_ipa_to_testfltght(
-        release: true,
-        pod_install: op[:pod_install],
-        version: op[:version],
-        ipa_out_put_dir: op[:ipa_out_put_dir],
-        scheme_name: op[:scheme_name],
-        auto_increment_version: op[:auto_increment_version],
-        build_num: op[:build_num]
-      )
-     
-  end
-
+  desc "Upload an release/debug ipa to TestFilght"
   lane :upload_ipa_to_testfltght do |op|
       
       # for debug test
@@ -73,31 +68,31 @@ platform :ios do
       end
             
       build_number = op[:build_num]      
-      unless op[:auto_increment_version] && op[:version] && build_number
-
+      unless op[:auto_increment_version] && op[:version]        
         # if version number not be given and can not auto increment then increment build number
         String.include(BuildNumberFactory)    
-        if build_number
+        if build_number          
           # increment by given build number
           build_number.is_build_avalable
           increment_build_number(build_number: build_number)
-        else          
+        else         
           # build number not be givend then auto increment   
           build_number = get_build_number               
           build_number = build_number.formatBuildNumber
           build_number.is_build_avalable
-          build_number = build_number.incrementBuild  
+          build_number = build_number.incrementBuild 
+          increment_build_number(build_number: build_number) 
         end
               
       end
                       
-      #out ipa file path
-      
+      #out ipa file path      
       sub_dir_name = is_release ? "release" : "debugBeta"
       full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
 
       Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
 
+      version_number = get_version_number unless version_number
       out_ipa_name = is_release ? "release_#{version_number}_build_#{build_number}" : "debugBeta_#{version_number}_build_#{build_number}"
 
       gym_configuration = is_release ? "Release" : "Debug"
