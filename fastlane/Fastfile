@@ -116,7 +116,10 @@ platform :ios do
 
       unless ["app-store", "ad-hoc", "package", "enterprise", "development"].include?export_method
           #TODO: 列出可以选择的选项
-          export_method = UI.input("#{export_method}格式不对! 请输入正确的ipa打包格式，如app-store")
+          puts "列出可以选择的选项"
+          export_method = MCFactory.wait_to_input(["app-store", "ad-hoc", "package", "enterprise", "development"], "#{export_method}格式不对! 请输入正确的ipa打包格式，如")
+          puts "export_method:#{export_method}"
+          # export_method = UI.input("#{export_method}格式不对! 请输入正确的ipa打包格式，如app-store")
       end               
 
       # gym(
@@ -135,7 +138,8 @@ platform :ios do
 
       unless ["app-store", "pgy", "testfilght"].include? deliver_type
           #TODO: 列出可以选择的选项
-          deliver_type = UI.input("#{export_method}格式不对! 请输入正确的ipa打包格式，如app-store")
+          deliver_type = wait_to_input(["app-store", "pgy", "testfilght"], "#{deliver}格式不对! 请输入正确的格式，如:")
+          # deliver_type = UI.input("#{export_method}格式不对! 请输入正确的ipa打包格式，如app-store")
       end   
 
       case deliver_type
@@ -156,12 +160,6 @@ platform :ios do
       
   end 
 
-  desc "export ipq file"
-  lane :export_ipa do |op|
-
-
-
-  end
 
   desc "检测version参数,不存在时就提示"
   lane :verify_version_lane do |options|
@@ -201,6 +199,27 @@ platform :ios do
       options[:ipa_out_put_dir]
   end
 
+end
+
+module MCFactory
+    
+  def wait_to_input(input_choices, message) 
+      puts "sadfas来了。。。。。"     
+      UI.message(message)
+      #遍历输出数组
+      input_choices.each_with_index do |elem, i|
+        puts "#{i.to_s}: #{elem}"
+      end
+
+      #等待输入
+      input_result = UI.input("请输入(0,1,2,3.....):")
+      unless input_choices.include? input_result
+          input_result = input_choices[input_result]
+      end
+      input_result
+  end
+  
+  module_function :wait_to_input
 end
 
 # 指定给String实例
