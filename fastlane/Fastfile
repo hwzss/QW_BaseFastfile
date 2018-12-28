@@ -8,6 +8,8 @@
     #   scheme_name
     #   auto_increment_version
     #   build_num
+    #   deliver: 上传到哪里  testfilght, pgy, app-store
+    #   export_method ：出包方法 app-store, ad-hoc, package, enterprise, development
     # >>>>>>>>>>>>>>
 
     # there is a simple code for use to upload ipa file to testfltght
@@ -30,6 +32,10 @@ platform :ios do
 
   ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '60'
   ENV['FASTLANE_XCODEBUILD_SETTINGS_RETRIES'] = '10'
+
+  before_all do
+       xcode_select "/Applications/Xcode.app"
+  end
 
   desc "Upload an release/debug ipa to TestFilght"
   lane :upload_ipa_to_testfltght do |op|
@@ -92,31 +98,70 @@ platform :ios do
       end
                       
       #out ipa file path      
-      sub_dir_name = is_release ? "release" : "debugBeta"
-      full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
+      # sub_dir_name = is_release ? "release" : "debugBeta"
+      # full_output_dir = "#{out_put_dir}/#{sub_dir_name}"
 
-      Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
+      # Dir.mkdir(File.expand_path("#{full_output_dir}")) unless Dir.exist?(File.expand_path("#{full_output_dir}"))
 
-      version_number = get_version_number unless version_number
-      out_ipa_name = is_release ? "release_#{version_number}_build_#{build_number}" : "debugBeta_#{version_number}_build_#{build_number}"
+      # version_number = get_version_number unless version_number
+      # out_ipa_name = is_release ? "release_#{version_number}_build_#{build_number}" : "debugBeta_#{version_number}_build_#{build_number}"
 
-      gym_configuration = is_release ? "Release" : "Debug"
+      # gym_configuration = is_release ? "Release" : "Debug"
 
-      scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
-      # puts "scheme_name:#{scheme_name}"
-      gym(
-        scheme: scheme_name,
-        output_directory: full_output_dir,
-        silent: true,
-        clean: false,
-        configuration: gym_configuration,
-        output_name: out_ipa_name,
-        # export_xcargs: "-allowProvisioningUpdates",
-      ) 
-      pilot(
-        ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
-      ) 
+      # scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
+      # # puts "scheme_name:#{scheme_name}"
+
+      # # TODO: 添加export-method 支持 , export_method ：出包方法 app-store, ad-hoc, package, enterprise, development
+      export_method = op[:export_method]? op[:export_method]: "app-store"
+
+      unless ["app-store", "ad-hoc", "package", "enterprise", "development"].include?export_method
+          #TODO: 列出可以选择的选项
+          export_method = UI.input("#{export_method}格式不对! 请输入正确的ipa打包格式，如app-store")
+      end               
+
+      # gym(
+      #   scheme: scheme_name,
+      #   output_directory: full_output_dir,
+      #   silent: true,
+      #   clean: false,
+      #   configuration: gym_configuration,
+      #   output_name: out_ipa_name,
+      #   export_xcargs: "-allowProvisioningUpdates",
+      #   export_method: export_method
+      # ) 
+
+      # TODO: 添加上传到友盟支持 deliver: 上传到哪里  testfilght, pgy, app-store
+      deliver_type = op[:deliver]? op[:deliver] : "testfilght"
+
+      unless ["app-store", "pgy", "testfilght"].include? deliver_type
+          #TODO: 列出可以选择的选项
+          deliver_type = UI.input("#{export_method}格式不对! 请输入正确的ipa打包格式，如app-store")
+      end   
+
+      case deliver_type
+        when "testfilght"
+          puts "上传testFilght"
+          # pilot(
+          #   ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
+          # ) 
+        when "pgy"
+          sh("fastlane add_plugin pgyer")
+          puts "上传蒲公英"
+        when "app-store"
+          puts "上传APPStore"
+        else                
+          puts "#{deliver_type}打包方式不对，任务结束"
+      end
+
+      
   end 
+
+  desc "export ipq file"
+  lane :export_ipa do |op|
+
+
+
+  end
 
   desc "检测version参数,不存在时就提示"
   lane :verify_version_lane do |options|
@@ -142,6 +187,7 @@ platform :ios do
       end
       options[:scheme_name]
   end
+
   desc "检测ipa打包路径，未设置时，要求输入路径"
   lane :verify_ipa_out_put_dir_lane do |options|
        unless options[:ipa_out_put_dir]
@@ -209,8 +255,6 @@ def formatABC
   version_arrs << "0" if version_arrs.count == 2
 
   temp_version_number = version_arrs[0..2].join('.')
-
-
 end
 
 # 将满足正则/^\d{1,}.\d.\d$/ 的值进行自增1
@@ -221,16 +265,13 @@ def increment
   if self =~ /^\d{1,}.[0-8].9$|^\d{1,}.[0-8].\d{2,}$/
   
      version_arrs[1] = version_arrs[1] + 1
-     version_arrs[2] = 0
-  
+     version_arrs[2] = 0  
   elsif self =~ /^\d{1,}.9.9$|\d{1,}.\d{2,}.\d{2,}$/
      
      version_arrs[0] = version_arrs[0] + 1
      version_arrs[1] = 0
      version_arrs[2] = 0
-
   else
-
       version_arrs[2] = version_arrs[2] + 1
 
   end
