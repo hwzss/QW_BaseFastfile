@@ -8,7 +8,7 @@
     #   scheme_name
     #   auto_increment_version
     #   build_num
-    #   deliver_p: 上传到哪里  testfilght, pgy, app-store
+    #   deliver_p: 上传到哪里  testfilght, pgy(友盟), app-store
     #   export_mt ：出包方法 app-store, ad-hoc, package, enterprise, development
     # >>>>>>>>>>>>>>
 
@@ -111,20 +111,13 @@ platform :ios do
       scheme_name = verify_shceme_lane scheme_name:op[:scheme_name]
       # puts "scheme_name:#{scheme_name}"
 
-      # TODO: 添加export-method 支持 , export_mt ：出包方法 app-store, ad-hoc, package, enterprise, development
-
-
       export_mt = op[:export_mt]? op[:export_mt]: "app-store"
       puts "export_mt:#{export_mt}"
 
       unless ["app-store", "ad-hoc", "package", "enterprise", "development"].include?export_mt
-          #TODO: 列出可以选择的选项
-          puts "列出可以选择的选项"
-          export_mt = MCFactory.wait_to_input(["app-store", "ad-hoc", "package", "enterprise", "development"], "#{export_mt}格式不对! 请输入正确的ipa打包格式，如")
-
-          puts "结束。。"
+          # 列出可以选择的选项          
+          export_mt = MCFactory.wait_to_input(["app-store", "ad-hoc", "package", "enterprise", "development"], "#{export_mt}格式不对! 请输入正确的ipa打包格式，如")        
           puts "export_mt:#{export_mt}"
-          # export_mt = UI.input("#{export_mt}格式不对! 请输入正确的ipa打包格式，如app-store")
       end               
 
       gym(
@@ -138,36 +131,35 @@ platform :ios do
         export_method: export_mt
       ) 
 
-      # TODO: 添加上传到友盟支持 deliver_p: 上传到哪里  testfilght, pgy, app-store
-
-      puts "delv 开始"
       deliver_type = op[:deliver_p]? op[:deliver_p] : "testfilght"
 
       unless ["app-store", "pgy", "testfilght"].include? deliver_type
-          #TODO: 列出可以选择的选项
+          # 列出可以选择的选项
           deliver_type = MCFactory.wait_to_input(["app-store", "pgy", "testfilght"], "#{deliver_type}格式不对! 请输入正确的格式，如")
-          # deliver_type = UI.input("#{export_mt}格式不对! 请输入正确的ipa打包格式，如app-store")
       end   
-
-      puts "delv 结束"
 
       ipa_path = full_output_dir + out_ipa_name +".ipa"
       case deliver_type
         when "testfilght"
           puts "上传testFilght"
-          # pilot(
-          #   ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
-          # ) 
+          pilot(
+            ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
+          ) 
         when "pgy"
           pgy_api_key = op[:pgy_api_key]
-          sh("curl -F 'file=@#{ipa_path}' -F '_api_key= #{pgy_api_key}' https://www.pgyer.com/apiv2/app/upload")
-          puts "上传蒲公英"
+          pgy_api_key = UI.input("请输入有盟的apikey:") unless pgy_api_key
+
+          if pgy_api_key
+            puts "上传蒲公英"
+            sh("curl -F 'file=@#{ipa_path}' -F '_api_key= #{pgy_api_key}' https://www.pgyer.com/apiv2/app/upload")                      
+          else
+            puts "错误key"
+          end
         when "app-store"
-          puts "上传APPStore"
+          puts "上传APPStore暂不开放"
         else                
           puts "#{deliver_type}打包方式不对，任务结束"
       end
-
       
   end 
 
@@ -215,13 +207,12 @@ end
 module MCFactory
     
   def wait_to_input(input_choices, message) 
-      puts "sadfas来了。。。。。"     
+       
       UI.message(message)
       #遍历输出数组
       input_choices.each_with_index do |elem, i|
         puts "#{i.to_s}: #{elem}"
       end
-
       #等待输入
       input_result = UI.input("请输入(0,1,2,3.....):")
       unless input_choices.include? input_result
@@ -244,6 +235,7 @@ module BuildNumberFactory
   end
   
   def formatBuildNumber
+
       build_arrs = self.split('.').map(&:to_i);
       build_number = build_arrs.last;
       build_number = 0 unless build_number;
@@ -251,8 +243,10 @@ module BuildNumberFactory
   end
 
   def incrementBuild
+    
       build_arrs = self.split('.').map(&:to_i);
       build_number = build_arrs[0];
+
       if build_number
         build_number = build_number + 1
       else
@@ -292,18 +286,15 @@ def increment
 
   version_arrs = self.split('.').map(&:to_i)
 
-  if self =~ /^\d{1,}.[0-8].9$|^\d{1,}.[0-8].\d{2,}$/
-  
+  if self =~ /^\d{1,}.[0-8].9$|^\d{1,}.[0-8].\d{2,}$/  
      version_arrs[1] = version_arrs[1] + 1
      version_arrs[2] = 0  
   elsif self =~ /^\d{1,}.9.9$|\d{1,}.\d{2,}.\d{2,}$/
-     
      version_arrs[0] = version_arrs[0] + 1
      version_arrs[1] = 0
      version_arrs[2] = 0
   else
       version_arrs[2] = version_arrs[2] + 1
-
   end
 
   version_arrs[0..2].join('.')
