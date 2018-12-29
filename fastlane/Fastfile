@@ -38,7 +38,7 @@ platform :ios do
   end
 
   desc "Upload an release/debug ipa to TestFilght"
-  lane :upload_ipa_to_testfltght do |op|
+  lane :upload_ipa do |op|
       
       # for debug test
       # puts "build_num#{op[:build_num]}"
@@ -243,7 +243,7 @@ module BuildNumberFactory
   end
 
   def incrementBuild
-    
+
       build_arrs = self.split('.').map(&:to_i);
       build_number = build_arrs[0];
 
