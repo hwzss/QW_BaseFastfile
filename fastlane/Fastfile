@@ -138,12 +138,12 @@ platform :ios do
           deliver_type = MCFactory.wait_to_input(["app-store", "pgy", "testfilght"], "#{deliver_type}格式不对! 请输入正确的格式，如")
       end   
 
-      ipa_path = full_output_dir + out_ipa_name +".ipa"
+      ipa_path = "#{full_output_dir}/#{out_ipa_name}.ipa"
       case deliver_type
         when "testfilght"
           puts "上传testFilght"
           pilot(
-            ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
+            ipa:ipa_path
           ) 
         when "pgy"
           pgy_api_key = op[:pgy_api_key]
@@ -151,6 +151,7 @@ platform :ios do
 
           if pgy_api_key
             puts "上传蒲公英"
+            ipa_path = File.expand_path(ipa_path)
             sh("curl -F 'file=@#{ipa_path}' -F '_api_key= #{pgy_api_key}' https://www.pgyer.com/apiv2/app/upload")                      
           else
             puts "错误key"
