@@ -151,6 +151,7 @@ platform :ios do
 
       puts "delv 结束"
 
+      ipa_path = full_output_dir + out_ipa_name +".ipa"
       case deliver_type
         when "testfilght"
           puts "上传testFilght"
@@ -158,7 +159,8 @@ platform :ios do
           #   ipa:"#{full_output_dir}/#{out_ipa_name}.ipa"
           # ) 
         when "pgy"
-          sh("fastlane add_plugin pgyer")
+          pgy_api_key = op[:pgy_api_key]
+          sh("curl -F 'file=@#{ipa_path}' -F '_api_key= #{pgy_api_key}' https://www.pgyer.com/apiv2/app/upload")
           puts "上传蒲公英"
         when "app-store"
           puts "上传APPStore"
